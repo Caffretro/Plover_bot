@@ -19,5 +19,10 @@ async def on_member_remove(member):
     channel = bot.get_channel(721122350895988807) # the id of welcome channel
     await channel.send(f'{member} 离开了车站')
 
+@bot.command()
+async def ping(ctx):
+    await ctx.send(f'{round(bot.latency * 1000)} ms') ## converting to ms
+
+
 # below is the token for Plover_bot
 bot.run('NzIxMTA2MzgyMDgxNzUzMDk5.XuPsvg.TA5v2Sp2rc2Fw4VQy-Ao0WAz9bg')
