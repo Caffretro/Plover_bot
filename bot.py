@@ -11,18 +11,6 @@ bot = commands.Bot(command_prefix = '##') # creating bot var
 async def on_ready():
     print(">> Bot is online <<")
 
-@bot.event
-async def on_member_join(member):
-    print(f"{member} join!")
-    channel = bot.get_channel(int(jsonData['welcome_channel'])) # the id of welcome channel
-    await channel.send(f'{member} 通过了检票口')
-
-@bot.event
-async def on_member_remove(member):
-    print(f"{member} leave!")
-    channel = bot.get_channel(int(jsonData['welcome_channel'])) # the id of welcome channel
-    await channel.send(f'{member} 离开了车站')
-
 @bot.command()
 async def load(ctx, extension):
     try:
