@@ -14,7 +14,7 @@ class React(Cog_Extension):
     @commands.command()
     async def gallery(self, ctx):
         selected = random.choice(os.listdir(jsonData['singyesterday']))
-        pic = discord.File(f'C:\\Caffretro\\Ca2+\\Discord Bot\\SingYesterday\\{selected}')
+        pic = discord.File(f'./SingYesterday/{selected}')
         await ctx.send(file=pic)
 
 # registering bot

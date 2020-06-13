@@ -35,7 +35,7 @@ async def reload(ctx, extension):
     except:
         await ctx.send(f'{extension} is not a valid extension.')
 
-for Filename in os.listdir('C:\Caffretro\Ca2+\Discord Bot\cmds'):
+for Filename in os.listdir('./cmds'):
     if Filename.endswith('.py'):
         bot.load_extension(f'cmds.{Filename[:-3]}')
 
