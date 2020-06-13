@@ -21,18 +21,18 @@ class Voice(Cog_Extension):
         # force the bot to join current ctx's channel
         if mode == 'strong':
             await voice.disconnect()
-
             if voice and voice.is_connected():
                 await voice.move_to(channel)
             else:
                 voice = await channel.connect()
         else:
             if voice and voice.is_connected():
-                await ctx.send('I\'m currently being used in another channel')
+                # check if bot is being used in another channel
+                if channel and channel != ctx.voice_client.channel:
+                    await ctx.send('I\'m currently being used in another channel')
             else:
                 voice = await channel.connect()
-
-        await ctx.send(f'Joined {channel}')
+                await ctx.send(f'Joined {channel}')
 
     @commands.command(pass_context=True, aliases=['l'])
     async def leave(self, ctx):
@@ -47,29 +47,23 @@ class Voice(Cog_Extension):
             print(f'Bot is not in a channel')
             await ctx.send(f'Bot is not in a channel')
 
+    # TODO: catch Extractor Error and DownloadError
+    # Go watch error episode. Assume it always gets correct url right now
     @commands.command(pass_context=True, aliases=['p'])
     async def play(self, ctx, url: str):
         # check if bot is idle
-        # channel = ctx.message.author.voice.channel # join where join command sender is
-        # voice = get(self.bot.voice_clients, guild=ctx.guild)
+        channel = ctx.message.author.voice.channel  # join where join command sender is
+        voice = get(self.bot.voice_clients, guild=ctx.guild)
 
-        # if voice and voice.is_connected():
-        #     if :
-        #         await ctx.send('I\'m currently being used in another channel')
-        # else:
-        #     voice = await channel.connect()
-        # if voice and voice.is_connected and ctx.voice_client.channel != channel:
-        #     # remind user that bot it being used, do nothing
-        #     await ctx.send('I\'m currently being used in another channel')
-        #     return
-        # elif ctx.voice_client.channel == channel:
-        #     print('Play command from same channel\n')
-        # else:
-        #     voice = await channel.connect()
+        if voice and voice.is_connected():
+            # check if bot is being used in another channel
+            if channel and channel != ctx.voice_client.channel:
+                await ctx.send('I\'m currently being used in another channel')
+                return
+        else:
+            voice = await channel.connect()
+            await ctx.send(f'Joined {channel}')
 
-        self.join(self, ctx, None)
-
-        # check local file
         song_there = os.path.isfile("song.mp3")
         try:
             if song_there:
@@ -98,6 +92,8 @@ class Voice(Cog_Extension):
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             print("Extracting audio and downloading now")
             ydl.download([url])
+
+        await ctx.send("Transcoding...(Sorry that I\'m just a Raspberry Pi)")
 
         for file in os.listdir('./'):
             if file.endswith('.mp3'):
