@@ -6,17 +6,18 @@ import os
 import youtube_dl
 from core.classes import Cog_Extension
 
-with open('setting.json','r', encoding='utf8') as codes:
+with open('setting.json', 'r', encoding='utf8') as codes:
     jsonData = json.load(codes)
+
 
 class Voice(Cog_Extension):
     global Voice
+
     @commands.command(pass_context=True, aliases=['j'])
     async def join(self, ctx, mode=None):
-        
-        channel = ctx.message.author.voice.channel # join where join command sender is
-        voice = get(self.bot.voice_clients, guild=ctx.guild)
 
+        channel = ctx.message.author.voice.channel  # join where join command sender is
+        voice = get(self.bot.voice_clients, guild=ctx.guild)
         # force the bot to join current ctx's channel
         if mode == 'strong':
             await voice.disconnect()
@@ -48,17 +49,25 @@ class Voice(Cog_Extension):
 
     @commands.command(pass_context=True, aliases=['p'])
     async def play(self, ctx, url: str):
-        # # check if bot is idle
+        # check if bot is idle
         # channel = ctx.message.author.voice.channel # join where join command sender is
         # voice = get(self.bot.voice_clients, guild=ctx.guild)
-        # if voice and voice.is_connected and self.bot.voice_clients.channel != channel:
+
+        # if voice and voice.is_connected():
+        #     if :
+        #         await ctx.send('I\'m currently being used in another channel')
+        # else:
+        #     voice = await channel.connect()
+        # if voice and voice.is_connected and ctx.voice_client.channel != channel:
         #     # remind user that bot it being used, do nothing
         #     await ctx.send('I\'m currently being used in another channel')
         #     return
-        # elif self.bot.voice_clients.channel == channel:
+        # elif ctx.voice_client.channel == channel:
         #     print('Play command from same channel\n')
         # else:
         #     voice = await channel.connect()
+
+        self.join(self, ctx, None)
 
         # check local file
         song_there = os.path.isfile("song.mp3")
@@ -70,7 +79,7 @@ class Voice(Cog_Extension):
             print("Can't delete song.mp3 since it's being played")
             await ctx.send("Music is being played")
             return
-        
+
         # using youtube-dl module
         await ctx.send("Loading...")
 
@@ -96,7 +105,8 @@ class Voice(Cog_Extension):
                 print(f'Renamed file: {file}')
                 os.rename(file, 'song.mp3')
 
-        voice.play(discord.FFmpegPCMAudio("song.mp3"), after=lambda e: print(f'{name} has finished playing'))
+        voice.play(discord.FFmpegPCMAudio("song.mp3"),
+                   after=lambda e: print(f'{name} has finished playing'))
         voice.source = discord.PCMVolumeTransformer(voice.source)
         voice.source.volume = 0.07
 
@@ -105,5 +115,7 @@ class Voice(Cog_Extension):
         print("Playing...")
 
 # registering bot
+
+
 def setup(bot):
     bot.add_cog(Voice(bot))
