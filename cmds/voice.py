@@ -80,8 +80,10 @@ class Voice(Cog_Extension):
         voice = get(self.bot.voice_clients, guild=ctx.guild)
 
         # quality set to 320, could result in errors. Default is 192
+        # toggle 'quiet' to get cleanner console
         ydl_opts = {
             'format': 'bestaudio/best',
+            'quiet': True,
             'postprocessors': [{
                 'key': 'FFmpegExtractAudio',
                 'preferredcodec': 'mp3',
@@ -110,8 +112,8 @@ class Voice(Cog_Extension):
         await ctx.send(f'Playing: {newName[0]}')
         print("Playing...")
 
+    @commands.command()
 # registering bot
-
 
 def setup(bot):
     bot.add_cog(Voice(bot))
