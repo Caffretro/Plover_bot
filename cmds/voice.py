@@ -12,7 +12,7 @@ with open('setting.json','r', encoding='utf8') as codes:
 class Voice(Cog_Extension):
     global Voice
     @commands.command(pass_context=True, aliases=['j'])
-    async def join(self, ctx, mode):
+    async def join(self, ctx, mode=None):
         
         channel = ctx.message.author.voice.channel # join where join command sender is
         voice = get(self.bot.voice_clients, guild=ctx.guild)
@@ -48,17 +48,17 @@ class Voice(Cog_Extension):
 
     @commands.command(pass_context=True, aliases=['p'])
     async def play(self, ctx, url: str):
-        # check if bot is idle
-        channel = ctx.message.author.voice.channel # join where join command sender is
-        voice = get(self.bot.voice_clients, guild=ctx.guild)
-        if voice and voice.is_connected and self.bot.voice_clients.channel != channel:
-            # remind user that bot it being used, do nothing
-            await ctx.send('I\'m currently being used in another channel')
-            return
-        elif self.bot.voice_clients.channel == channel:
-            print('Play command from same channel\n')
-        else:
-            voice = await channel.connect()
+        # # check if bot is idle
+        # channel = ctx.message.author.voice.channel # join where join command sender is
+        # voice = get(self.bot.voice_clients, guild=ctx.guild)
+        # if voice and voice.is_connected and self.bot.voice_clients.channel != channel:
+        #     # remind user that bot it being used, do nothing
+        #     await ctx.send('I\'m currently being used in another channel')
+        #     return
+        # elif self.bot.voice_clients.channel == channel:
+        #     print('Play command from same channel\n')
+        # else:
+        #     voice = await channel.connect()
 
         # check local file
         song_there = os.path.isfile("song.mp3")
