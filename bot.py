@@ -9,7 +9,7 @@ bot = commands.Bot(command_prefix = '##') # creating bot var
 
 @bot.event
 async def on_ready():
-    await bot.change_presence(activity = discord.Streaming(url='https://singyesterday.com/'))
+    await bot.change_presence(activity = discord.Activity(type=3, name='singyesterday.com'))
     print(">> Bot is online <<")
 
 @bot.command()
