@@ -4,6 +4,7 @@ from discord.utils import get
 import json
 import os
 import youtube_dl
+import array
 from core.classes import Cog_Extension
 
 with open('setting.json', 'r', encoding='utf8') as codes:
@@ -75,15 +76,13 @@ class Voice(Cog_Extension):
             return
 
         # using youtube-dl module
-        await ctx.send("Loading...")
-
+        await ctx.send("Loading...(sorry for the waiting but I\'m just a Raspberry Pi)")
         voice = get(self.bot.voice_clients, guild=ctx.guild)
 
         # quality set to 320, could result in errors. Default is 192
         # toggle 'quiet' to get cleanner console
         ydl_opts = {
             'format': 'bestaudio/best',
-            'quiet': True,
             'postprocessors': [{
                 'key': 'FFmpegExtractAudio',
                 'preferredcodec': 'mp3',
@@ -94,8 +93,6 @@ class Voice(Cog_Extension):
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             print("Extracting audio and downloading now")
             ydl.download([url])
-
-        await ctx.send("Transcoding...(Sorry that I\'m just a Raspberry Pi)")
 
         for file in os.listdir('./'):
             if file.endswith('.mp3'):
@@ -112,8 +109,90 @@ class Voice(Cog_Extension):
         await ctx.send(f'Playing: {newName[0]}')
         print("Playing...")
 
-    @commands.command()
+    @commands.command(pass_context=True, aliases=['pl'])
+    async def playlocal(self, ctx, name=None):
+
+        localSongs = []
+        if name is None:
+            print("User entered invalid song name")
+            await ctx.send("Usage: playlocal <songname>")
+            return
+
+        channel = ctx.message.author.voice.channel  # join where join command sender is
+        voice = get(self.bot.voice_clients, guild=ctx.guild)
+
+        if voice and voice.is_connected():
+            # check if bot is being used in another channel
+            if channel and channel != ctx.voice_client.channel:
+                await ctx.send('I\'m currently being used in another channel')
+                return
+        else:
+            voice = await channel.connect()
+            await ctx.send(f'Joined {channel}')
+
+        # get to music storage
+        await ctx.send("Loading...(sorry for the waiting but I\'m just a Raspberry Pi)")
+        voice = get(self.bot.voice_clients, guild=ctx.guild)
+        for file in os.listdir('/home/pi/Music'):
+            if file.endswith('.mp3') or file.endswith('.flac') or file.endswith('.wma'):
+                localSongs.append(file)
+        matching = [s for s in localSongs if name in s]
+        if not matching:
+            print(f"{name} not found in local disk")
+            await ctx.send(f"{name} not found in local disk")
+        elif len(matching) > 1:
+            await ctx.send("Below are matchings. Specify which one you want to play:")
+            for candidate in matching:
+                await ctx.send(f'  {candidate}')
+            # TODO: implement reaction
+        else:
+            voice.play(discord.FFmpegPCMAudio(f'/home/pi/Music/{matching[0]}'),
+                       after=lambda e: print(f'{name} has finished playing'))
+            voice.source = discord.PCMVolumeTransformer(voice.source)
+            voice.source.volume = 0.07
+
+            newName = name.rsplit('-', 2)
+            await ctx.send(f'Playing: {newName[0]}')
+            print("Playing...")
+
+    @commands.command(pass_context=True, aliases=['pa', 'pau'])
+    async def pause(self, ctx):
+        voice = get(self.bot.voice_clients, guild=ctx.guild)
+
+        if voice and voice.is_playing():
+            print("Music paused")
+            voice.pause()
+            await ctx.send("Music paused")
+        else:
+            print("There aren't any musics playing")
+            await ctx.send("There aren't any musics playing")
+
+    @commands.command(pass_context=True, aliases=['r', 're'])
+    async def resume(self, ctx):
+        voice = get(self.bot.voice_clients, guild=ctx.guild)
+
+        if voice and voice.is_paused():
+            print("Music resumed")
+            voice.resume()
+            await ctx.send("Music resumed")
+        else:
+            print("Music isn't paused")
+            await ctx.send("Music isn't paused")
+
+    @commands.command(pass_context=True, aliases=['s', 'st'])
+    async def stop(self, ctx):
+        voice = get(self.bot.voice_clients, guild=ctx.guild)
+
+        if voice and voice.is_playing():
+            print("Music stopped")
+            voice.stop()
+            await ctx.send("Music stopped")
+        else:
+            print("There aren't any musics playing")
+            await ctx.send("There aren't any musics playing")
+
 # registering bot
+
 
 def setup(bot):
     bot.add_cog(Voice(bot))

@@ -1,16 +1,19 @@
 import discord
 from discord.ext import commands
 import json
-import os, random
+import os
+import random
 
-with open('setting.json','r', encoding='utf8') as codes:
+with open('setting.json', 'r', encoding='utf8') as codes:
     jsonData = json.load(codes)
-bot = commands.Bot(command_prefix = '##') # creating bot var
+bot = commands.Bot(command_prefix='##')  # creating bot var
+
 
 @bot.event
 async def on_ready():
-    await bot.change_presence(activity = discord.Activity(type=3, name='singyesterday.com'))
+    await bot.change_presence(activity=discord.Activity(type=3, name='singyesterday.com'))
     print(">> Bot is online <<")
+
 
 @bot.command()
 async def load(ctx, extension):
@@ -20,6 +23,7 @@ async def load(ctx, extension):
     except:
         await ctx.send(f'{extension} is not a valid extension.')
 
+
 @bot.command()
 async def unload(ctx, extension):
     try:
@@ -27,6 +31,7 @@ async def unload(ctx, extension):
         await ctx.send(f'Unloaded {extension.lower()}.')
     except:
         await ctx.send(f'{extension} is not a valid extension.')
+
 
 @bot.command()
 async def reload(ctx, extension):
