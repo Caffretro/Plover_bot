@@ -51,8 +51,8 @@ class Voice(Cog_Extension):
 
     # TODO: catch Extractor Error and DownloadError
     # Go watch error episode. Assume it always gets correct url right now
-    @commands.command(pass_context=True, aliases=['pl'])
-    async def play(self, ctx, url: str):
+    @commands.command(pass_context=True, aliases=['po'])
+    async def playonline(self, ctx, url: str):
 
         # bugs with youtube-dl playing, currently offlining play command
         await ctx.send("Youtube music streaming is currently offline, sorry for any inconvenience.")
@@ -116,7 +116,7 @@ class Voice(Cog_Extension):
         print("Playing...")
 
     @commands.command(pass_context=True, aliases=['p'])
-    async def playlocal(self, ctx, *, name=None):
+    async def play(self, ctx, *, name=None):
 
         localSongs = []
         if name is None:
