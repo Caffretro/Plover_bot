@@ -1,2 +1,4 @@
 .vscode/settings.json
 ./database
+.\database
+.vscode\settings.json
