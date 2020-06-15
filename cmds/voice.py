@@ -13,6 +13,7 @@ with open('setting.json', 'r', encoding='utf8') as codes:
 
 class Voice(Cog_Extension):
     global Voice
+    selections = []
 
     @commands.command(pass_context=True, aliases=['j'])
     async def join(self, ctx, mode=None):
@@ -110,7 +111,7 @@ class Voice(Cog_Extension):
         print("Playing...")
 
     @commands.command(pass_context=True, aliases=['pl'])
-    async def playlocal(self, ctx, name=None):
+    async def playlocal(self, ctx, *, name=None):
 
         localSongs = []
         if name is None:
@@ -130,25 +131,38 @@ class Voice(Cog_Extension):
             voice = await channel.connect()
             await ctx.send(f'Joined {channel}')
 
+        # check if this request is a follow up request
+        if self.selections:
+            voice.play(discord.FFmpegPCMAudio(f'/home/pi/Music/{self.selections[int(name) - 1]}'),
+                       after=lambda e: print(f'{self.selections[int(name) - 1]} has finished playing'))
+            voice.source = discord.PCMVolumeTransformer(voice.source)
+            voice.source.volume = 0.07
+
+            await ctx.send(f'Playing: {self.selections[int(name) - 1]}')
+            print("Playing...")
+            self.selections.clear()
+            return
+
         # get to music storage
         await ctx.send("Loading...(sorry for the waiting but I\'m just a Raspberry Pi)")
         voice = get(self.bot.voice_clients, guild=ctx.guild)
         for file in os.listdir('/home/pi/Music'):
             if file.endswith('.mp3') or file.endswith('.flac') or file.endswith('.wma'):
                 localSongs.append(file)
-        matching = [s for s in localSongs if name in s]
+        matching = [s for s in localSongs if name.lower() in s.lower()]
         if not matching:
             print(f"{name} not found in local disk")
             await ctx.send(f"{name} not found in local disk")
         elif len(matching) > 1:
             # TODO: example: not afraid searching
             await ctx.send("Below are matchings. Specify which one you want to play:")
-            for candidate in matching:
-                await ctx.send(f'  {candidate}')
+            for candidate, i in zip(matching, range(len(matching))):
+                await ctx.send(f'|     {i+1}. {candidate}')
+                self.selections.append(candidate)
             # TODO: implement reaction
         else:
             voice.play(discord.FFmpegPCMAudio(f'/home/pi/Music/{matching[0]}'),
-                       after=lambda e: print(f'{name} has finished playing'))
+                       after=lambda e: print(f'{matching[0]} has finished playing'))
             voice.source = discord.PCMVolumeTransformer(voice.source)
             voice.source.volume = 0.07
 
