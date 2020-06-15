@@ -141,6 +141,7 @@ class Voice(Cog_Extension):
             print(f"{name} not found in local disk")
             await ctx.send(f"{name} not found in local disk")
         elif len(matching) > 1:
+            # TODO: example: not afraid searching
             await ctx.send("Below are matchings. Specify which one you want to play:")
             for candidate in matching:
                 await ctx.send(f'  {candidate}')
@@ -151,8 +152,7 @@ class Voice(Cog_Extension):
             voice.source = discord.PCMVolumeTransformer(voice.source)
             voice.source.volume = 0.07
 
-            newName = name.rsplit('-', 2)
-            await ctx.send(f'Playing: {newName[0]}')
+            await ctx.send(f'Playing: {matching}')
             print("Playing...")
 
     @commands.command(pass_context=True, aliases=['pa', 'pau'])
