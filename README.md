@@ -12,4 +12,8 @@ A discord bot that could play local musics
   ``` 
 ## Usage
 
-The affix of Plover_bot is ##.
+The affix of Plover_bot is ##
+  ![Image](./filedump/help.jpg "Functions currently supporting")
+Specifically:
+* ##Gallery returns a random 
+Commands are distributed to different modules. Changes to these 
