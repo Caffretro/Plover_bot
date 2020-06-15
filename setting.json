@@ -4,5 +4,6 @@
     "chat_channel": "619367478757294083",
     "music_channel": "619388170940842005",
     "private_channel": "683846415167914007",
-    "singyesterday": "./SingYesterday"
+    "singyesterday": "./SingYesterday",
+    "musicStorage": "/home/pi/Music"
 }

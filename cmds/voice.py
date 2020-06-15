@@ -51,8 +51,13 @@ class Voice(Cog_Extension):
 
     # TODO: catch Extractor Error and DownloadError
     # Go watch error episode. Assume it always gets correct url right now
-    @commands.command(pass_context=True, aliases=['p'])
+    @commands.command(pass_context=True, aliases=['pl'])
     async def play(self, ctx, url: str):
+
+        # bugs with youtube-dl playing, currently offlining play command
+        await ctx.send("Youtube music streaming is currently offline, sorry for any inconvenience.")
+        return
+
         # check if bot is idle
         channel = ctx.message.author.voice.channel  # join where join command sender is
         voice = get(self.bot.voice_clients, guild=ctx.guild)
@@ -110,7 +115,7 @@ class Voice(Cog_Extension):
         await ctx.send(f'Playing: {newName[0]}')
         print("Playing...")
 
-    @commands.command(pass_context=True, aliases=['pl'])
+    @commands.command(pass_context=True, aliases=['p'])
     async def playlocal(self, ctx, *, name=None):
 
         localSongs = []
@@ -146,7 +151,7 @@ class Voice(Cog_Extension):
         # get to music storage
         await ctx.send("Loading...(sorry for the waiting but I\'m just a Raspberry Pi)")
         voice = get(self.bot.voice_clients, guild=ctx.guild)
-        for file in os.listdir('/home/pi/Music'):
+        for file in os.listdir(jsonData['musicStorage']):
             if file.endswith('.mp3') or file.endswith('.flac') or file.endswith('.wma'):
                 localSongs.append(file)
         matching = [s for s in localSongs if name.lower() in s.lower()]
