@@ -16,7 +16,7 @@ A discord bot that could play local musics
 The affix of Plover_bot is ##
   ![Image](./filedump/help.jpg "Functions currently supporting")
 Specifically:
-* ##Gallery returns a random picture among the collection downloaded from the official site of [Sing Yesterday](https://singyesterday.com/). Highly recommmended, absolutely will be in my TOP3 animes before I die.
+* ##Gallery returns a random picture among the collection downloaded from the official site of [Sing Yesterday](https://singyesterday.com/). Highly recommmended, absolutely will be in my TOP3 anime list before I die.
 * You can replace my gallery with yours by modifying the path corresponding to "singyesterday" tag to the directory of your collection.
 * ##playlocal is deprecated. It is now integrated into ##play
 
