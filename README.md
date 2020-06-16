@@ -23,6 +23,7 @@ Python's Cog_Extension is being used to make developing and debugging single mod
 To implement your own commands:
 * Commands are all in ./cmd, and each .py file correspond to a function module of Plover_bot.
 * If a new module (i.e. collection of commands) is needed, just copy main.py and make your own changes.
+
 Testing in your discord:
 * You can test a single module by using ##load/##reload/##unload in your server's text channel. It would not cause any impact on the functioning of other modules.
 
