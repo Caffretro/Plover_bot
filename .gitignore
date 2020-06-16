@@ -1,6 +1,3 @@
 .vscode/settings.json
-.vscode\settings.json
-./database
-.\database
-./settings.json
-.\settings.json
+database
+setting.json
