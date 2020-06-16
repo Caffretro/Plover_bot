@@ -5,7 +5,7 @@ A discord bot that could play local musics
 ## Installation
 
 * You need to [invite Plover_bot](https://discord.com/api/oauth2/authorize?) to your server first. 
-* Clone this repository to your local linux machine, then run the code below in terminal
+* Clone this repository to your local linux machine, then run the code below in terminal within Plover_bot's directory
 
   ```bash
    python bot.py
