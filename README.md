@@ -21,7 +21,7 @@ Specifically:
 * ##playlocal is deprecated. It is now integrated into ##play
 
 ## Developing
-Python's Cog_Extension is being used to make developing and debugging single module easier. 
+Python's Cog_Extension is implemented to make developing and debugging single module easier. 
 To implement your own commands:
 * Commands are all in ./cmd, and each .py file correspond to a function module of Plover_bot.
 * If a new module (i.e. collection of commands) is needed, just copy main.py and make your own changes.
