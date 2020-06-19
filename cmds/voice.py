@@ -14,6 +14,9 @@ with open('setting.json', 'r', encoding='utf8') as codes:
 class Voice(Cog_Extension):
     global Voice
     selections = []
+    localSongs = []
+    queue = []
+    currentSong = None
 
     @commands.command(pass_context=True, aliases=['j'])
     async def join(self, ctx, mode=None):
@@ -115,17 +118,41 @@ class Voice(Cog_Extension):
         await ctx.send(f'Playing: {newName[0]}')
         print("Playing...")
 
+    @commands.command(pass_context=True, aliases=['c'])
+    async def circle(self, ctx):
+        channel = ctx.message.author.voice.channel  # join where join command sender is
+        voice = get(self.bot.voice_clients, guild=ctx.guild)
+
+        # scan local music files
+        if not self.localSongs:
+            for file in os.listdir(jsonData['musicStorage']):
+                if file.endswith('.mp3') or file.endswith('.flac') or file.endswith('.wma'):
+                    self.localSongs.append(file)
+
     @commands.command(pass_context=True, aliases=['p'])
     async def play(self, ctx, *, name=None):
 
-        localSongs = []
+        channel = ctx.message.author.voice.channel  # join where join command sender is
+        voice = get(self.bot.voice_clients, guild=ctx.guild)
+
+        def check_queue(selection=False):
+            # make check_queue a one time function, so the program can await a text message to discord channel
+            # if the song just added to queue is a secondary command, need to reset selection
+            if selection:
+                self.selections.clear()
+            if self.queue:
+                nextSong = self.queue.pop(0)
+                self.currentSong = nextSong
+                voice.play(discord.FFmpegPCMAudio(f'/home/pi/Music/{nextSong}'),
+                           after=lambda e: print(f'{nextSong} has finished playing'))
+                voice.source = discord.PCMVolumeTransformer(voice.source)
+                voice.source.volume = 0.07
+                # DANGER
+
         if name is None:
             print("User entered invalid song name")
             await ctx.send("Usage: playlocal <songname>")
             return
-
-        channel = ctx.message.author.voice.channel  # join where join command sender is
-        voice = get(self.bot.voice_clients, guild=ctx.guild)
 
         if voice and voice.is_connected():
             # check if bot is being used in another channel
@@ -138,41 +165,37 @@ class Voice(Cog_Extension):
 
         # check if this request is a follow up request
         if self.selections:
-            voice.play(discord.FFmpegPCMAudio(f'/home/pi/Music/{self.selections[int(name) - 1]}'),
-                       after=lambda e: print(f'{self.selections[int(name) - 1]} has finished playing'))
-            voice.source = discord.PCMVolumeTransformer(voice.source)
-            voice.source.volume = 0.07
-
-            await ctx.send(f'Playing: {self.selections[int(name) - 1]}')
-            print("Playing...")
-            self.selections.clear()
+            self.queue.append(self.selections[int(name) - 1])
+            check_queue(True)
+            # TODO: check if queue is empty and choose what to display in text channel
+            await ctx.send(f'Now playing: {self.currentSong}')
             return
 
         # get to music storage
         await ctx.send("Loading...(sorry for the waiting but I\'m just a Raspberry Pi)")
-        voice = get(self.bot.voice_clients, guild=ctx.guild)
-        for file in os.listdir(jsonData['musicStorage']):
-            if file.endswith('.mp3') or file.endswith('.flac') or file.endswith('.wma'):
-                localSongs.append(file)
-        matching = [s for s in localSongs if name.lower() in s.lower()]
+
+        # scan local music files
+        if not self.localSongs:
+            for file in os.listdir(jsonData['musicStorage']):
+                if file.endswith('.mp3') or file.endswith('.flac') or file.endswith('.wma'):
+                    self.localSongs.append(file)
+        # search keywords
+        matching = [s for s in self.localSongs if name.lower() in s.lower()]
         if not matching:
             print(f"{name} not found in local disk")
             await ctx.send(f"{name} not found in local disk")
         elif len(matching) > 1:
-            # TODO: example: not afraid searching
             await ctx.send("Below are matchings. Specify which one you want to play:")
             for candidate, i in zip(matching, range(len(matching))):
                 await ctx.send(f'|     {i+1}. {candidate}')
                 self.selections.append(candidate)
-            # TODO: implement reaction
         else:
-            voice.play(discord.FFmpegPCMAudio(f'/home/pi/Music/{matching[0]}'),
-                       after=lambda e: print(f'{matching[0]} has finished playing'))
-            voice.source = discord.PCMVolumeTransformer(voice.source)
-            voice.source.volume = 0.07
+            self.queue.append(matching[0])
+            check_queue()
+            # TODO: check if queue is empty and choose what to display in text channel
+            await ctx.send(f'Now playing: {self.currentSong}')
 
-            await ctx.send(f'Playing: {matching}')
-            print("Playing...")
+    # TODO: implement skip function
 
     @commands.command(pass_context=True, aliases=['pa', 'pau'])
     async def pause(self, ctx):
@@ -200,6 +223,7 @@ class Voice(Cog_Extension):
 
     @commands.command(pass_context=True, aliases=['s', 'st'])
     async def stop(self, ctx):
+        self.queue.clear()
         voice = get(self.bot.voice_clients, guild=ctx.guild)
 
         if voice and voice.is_playing():
