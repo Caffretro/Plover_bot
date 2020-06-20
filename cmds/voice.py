@@ -5,6 +5,7 @@ import json
 import os
 import youtube_dl
 import array
+import asyncio
 from core.classes import Cog_Extension
 
 with open('setting.json', 'r', encoding='utf8') as codes:
@@ -12,11 +13,16 @@ with open('setting.json', 'r', encoding='utf8') as codes:
 
 
 class Voice(Cog_Extension):
+    class Next_Error(Exception):
+        def __init__(self, value):
+            self.value = value
+
     global Voice
     selections = []
     localSongs = []
     queue = []
     currentSong = None
+    fut = None
 
     @commands.command(pass_context=True, aliases=['j'])
     async def join(self, ctx, mode=None):
@@ -129,24 +135,53 @@ class Voice(Cog_Extension):
                 if file.endswith('.mp3') or file.endswith('.flac') or file.endswith('.wma'):
                     self.localSongs.append(file)
 
+    async def print(self, ctx, name=None):
+        await ctx.send(f'Now playing: {name}')
+
     @commands.command(pass_context=True, aliases=['p'])
     async def play(self, ctx, *, name=None):
 
         channel = ctx.message.author.voice.channel  # join where join command sender is
         voice = get(self.bot.voice_clients, guild=ctx.guild)
+        # value to be sent to check_queue, toggled on info received
+        secondaryCommandReceived = False
 
         def check_queue(selection=False):
             # make check_queue a one time function, so the program can await a text message to discord channel
             # if the song just added to queue is a secondary command, need to reset selection
             if selection:
                 self.selections.clear()
+                secondaryCommandReceived = False
             if self.queue:
                 nextSong = self.queue.pop(0)
                 self.currentSong = nextSong
                 voice.play(discord.FFmpegPCMAudio(f'/home/pi/Music/{nextSong}'),
-                           after=lambda e: print(f'{nextSong} has finished playing'))
+                           after=lambda e: check_queue())
                 voice.source = discord.PCMVolumeTransformer(voice.source)
                 voice.source.volume = 0.07
+                # raise(self.Next_Error(self.currentSong))
+                # loop = asyncio.get_event_loop()
+                # asyncio.run(self.print(self.currentSong))
+                # try:
+                #     asyncio.get_running_loop()
+                #     loop = asyncio.create_task(
+                #         self.print(ctx, self.currentSong))
+                #     asyncio.gather(loop)
+                # except RuntimeError:
+                # asyncio.run()
+                try:
+                    # asyncio.get_running_loop()
+                    asyncio.new_event_loop()
+                    loop = asyncio.create_task(
+                        self.print(ctx, self.currentSong))
+                    asyncio.gather(loop)
+                    if self.queue:
+                        fut = asyncio.get_running_loop().create_future()
+                except RuntimeError:
+                    asyncio.wait(self.print(ctx, self.currentSong))
+
+                # task = asyncio.create_task(self.print(self.currentSong))
+                # asyncio.get_running_loop().run_until_complete(task)
 
         if name is None:
             print("User entered invalid song name")
@@ -165,9 +200,11 @@ class Voice(Cog_Extension):
         # check if this request is a follow up request
         if self.selections:
             self.queue.append(self.selections[int(name) - 1])
-            check_queue(True)
-            # TODO: check if queue is empty and choose what to display in text channel
-            await ctx.send(f'Now playing: {self.currentSong}')
+            secondaryCommandReceived = True
+            if not voice.is_playing():
+                check_queue(True)
+            # # TODO: check if queue is empty and choose what to display in text channel
+            # await ctx.send(f'Now playing: {self.currentSong}')
             return
 
         # get to music storage
@@ -190,9 +227,18 @@ class Voice(Cog_Extension):
                 self.selections.append(candidate)
         else:
             self.queue.append(matching[0])
-            check_queue()
+            if not voice.is_playing():
+                check_queue()
             # TODO: check if queue is empty and choose what to display in text channel
-            await ctx.send(f'Now playing: {self.currentSong}')
+            # await ctx.send(f'Now playing: {self.currentSong}')
+
+        # # stuck in this loop to make sure it can detect the next song
+        # while self.queue and not voice.is_playing():
+        #     check_queue(secondaryCommandReceived)
+        #     await ctx.send(f'Now playing: {self.currentSong}')
+        #     while True:
+        #         if not voice.is_playing():
+        #             break
 
     # TODO: implement skip function
 
