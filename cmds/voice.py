@@ -147,7 +147,6 @@ class Voice(Cog_Extension):
                            after=lambda e: print(f'{nextSong} has finished playing'))
                 voice.source = discord.PCMVolumeTransformer(voice.source)
                 voice.source.volume = 0.07
-                # DANGER
 
         if name is None:
             print("User entered invalid song name")
