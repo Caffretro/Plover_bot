@@ -164,11 +164,14 @@ class Voice(Cog_Extension):
 
         # check if this request is a follow up request
         if self.selections:
-            self.queue.append(self.selections[int(name) - 1])
-            check_queue(True)
-            # TODO: check if queue is empty and choose what to display in text channel
-            await ctx.send(f'Now playing: {self.currentSong}')
-            return
+            if name.isdigit():
+                self.queue.append(self.selections[int(name) - 1])
+                check_queue(True)
+                # TODO: check if queue is empty and choose what to display in text channel
+                await ctx.send(f'Now playing: {self.currentSong}')
+                return
+            else:
+                self.selections.clear()
 
         # get to music storage
         await ctx.send("Loading...(sorry for the waiting but I\'m just a Raspberry Pi)")
