@@ -30,6 +30,6 @@ Testing in your discord:
 * You can test a single module by using ##load/##reload/##unload in your server's text channel. It would not cause any impact on the functioning of other modules.
 
 ## Contributing
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+Pull requests are welcomed. For major changes, please open an issue first to discuss what you would like to change.
 
 Please make sure to update tests as appropriate.
